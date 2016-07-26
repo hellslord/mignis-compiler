@@ -8,3 +8,7 @@ A.Y.: 2015/16
 
 M.Sc. Computer Science
 
+
+This new version manages overlapping rules and gives priority to the DROP/REJECT rules
+
+
