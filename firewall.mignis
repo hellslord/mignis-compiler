@@ -3,29 +3,26 @@ default_rules   no
 logging         no
 
 INTERFACES
-wan     eth2 0.0.0.0/0
-lan     eth0 10.0.0.0/8
-wlan    eth1 172.22.0.0/16
+wan     eth2 0.0.0.0/0			# Internet
+lan     eth0 10.0.0.0/8			# Cabled
+wlan    eth1 172.22.0.0/16		# Wireless
 
 ALIASES
-mypc    10.0.0.2
-router  82.120.12.3
-server  10.0.0.3
-mal     192.168.1.0/24
+mypc    10.0.0.2			# My PC
+router  82.120.12.3			# External router address
+server  10.0.0.3			# An internal Server
+mal     192.168.1.0/24			# A malicious network
 
 FIREWALL
-lan [.] > wan
-wlan / wan
-wlan > mypc:8080
-wlan > 8.8.8.8
-mypc > wan
-* > [router:80] server:80
-* / mal
+lan [.] > wan 				# lan can go outside with masquerade
+wlan / wan				# wlan cannot go outside
+wlan > mypc:8080			# wlan can connect to mypc at port 8080
+* > [router:80] server:80		# Anything can connect to server:80 with dNAT
+* / mal 				# Nothib can connect to mal
 
 POLICIES
-wan / lan:10
+wan / lan
 * // lan 
-local / wlan
 
 CUSTOM
 -A INPUT -p tcp --dport 7792 -j LOG --log-prefix "PORT 7792 "
