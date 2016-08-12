@@ -1,6 +1,7 @@
 # Mignis-Compiler
 =================
 
+<pre>
 Author: Alessio Zennaro
 Supervisor: Prof. Riccardo Focardi
 A.Y: 2015/16
@@ -33,4 +34,4 @@ final translator does not implement its features.
 
 2016-8-12
 
-
+</pre>
