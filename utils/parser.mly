@@ -76,7 +76,8 @@ FirewList:
 /* This is how an endpoint looks like */
 Endp:
   IDENTIFIER If Prt										{ Name($1, $2, $3) }
- |HOST_IP If Prt											{ Ip($1, $2, $3) }
+ |HOST_IP If Prt											{ Ip("h-" ^ $1, $2, $3) }
+ |NET_IP If Prt                       { Ip("n-" ^ $1, $2, $3) } 
  |LOCAL Prt														{ Local($2) }
  |STAR																{ Star }
 ;
@@ -113,10 +114,8 @@ PolicyConf:
 ;
 /* This is the structure of a default policy rule */
 PolicyList:
-	STAR ALLOW STAR Prtc PolicyList			{ Default(Pallow, $4)::$5 }
- |STAR TWALLOW STAR Prtc PolicyList		{ Default(Ptwallow, $4)::$5 }
- |STAR DROP STAR Prtc PolicyList			{ Default(Pdrop, $4)::$5 }
- |STAR REJECT STAR Prtc PolicyList		{ Default(Preject, $4)::$5 }
+  Endp DROP Endp Prtc PolicyList			{ Default(Pdrop, $1, $3, $4)::$5 }
+ |Endp REJECT Endp Prtc PolicyList		{ Default(Preject, $1, $3, $4)::$5 }
  |																		{ [] }
 ;
 /* The custom rules begins with the keyword CUSTOM */

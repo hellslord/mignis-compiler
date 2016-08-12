@@ -33,7 +33,6 @@ POLICIES
 * // *  icmp
 * // *  udp
 * / *
-* <> * tcp
 
 CUSTOM
 # log and accept packets on port 7792

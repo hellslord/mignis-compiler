@@ -16,7 +16,7 @@ and alias							= Hostalias of id * host_ip
 
 and rule							= op
 
-and policy						= Default of pop * protocol
+and policy						= Default of pop * endpoint * endpoint * protocol
 
 and custom						= crule
 
@@ -49,9 +49,7 @@ and op								= Allow of endpoint * nat *
 																  protocol *
 																  formula
 
-and pop								= Pallow
-											| Ptwallow
-											| Pdrop
+and pop								= Pdrop
 											| Preject
 
 and protocol					= Tcp

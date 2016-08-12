@@ -1,0 +1,32 @@
+OPTIONS
+default_rules   no
+logging         no
+
+INTERFACES
+wan     eth2 0.0.0.0/0
+lan     eth0 10.0.0.0/8
+wlan    eth1 172.22.0.0/16
+
+ALIASES
+mypc    10.0.0.2
+router  82.120.12.3
+server  10.0.0.3
+mal     192.168.1.0/24
+
+FIREWALL
+lan [.] > wan
+wlan / wan
+wlan > mypc:8080
+wlan > 8.8.8.8
+mypc > wan
+* > [router:80] server:80
+* / mal
+
+POLICIES
+wan / lan:10
+* // lan 
+local / wlan
+
+CUSTOM
+-A INPUT -p tcp --dport 7792 -j LOG --log-prefix "PORT 7792 "
+-A INPUT -p tcp --dport 7792 -j ACCEPT

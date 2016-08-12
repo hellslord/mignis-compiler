@@ -58,12 +58,18 @@
                 "Net_Ip"                : "Int.Int.Int.Int/Int",
                 
                 "Ip"                    : 
-                        ["h:Int.Int.Int.Int", "n:Net_Ip"],
+                        ["h-Int.Int.Int.Int", "n-Net_Ip"],
                 
                 "Endpoint"              :
                         {
                             "Host"              :
-                                ["String", "Ip", "ANY", "MASQUERADE", ""],
+                                ["String", 
+                                 "Ip", 
+                                 "ANY",
+                                 "LOCAL",
+                                 "MASQUERADE", 
+                                 ""
+                                ],
                             "Interface"         : 
                                 ["String", ""],
                             "Port"              : "Int"                                

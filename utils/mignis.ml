@@ -31,9 +31,11 @@ else
 					exit 0
 				end
 		done;
-		if Sys.file_exists Sys.argv.(par_len - 1) then
+		let space = Str.regexp " " in
+		let name_escaped = Str.global_replace space "\\ " Sys.argv.(par_len - 1) in
+		if Sys.file_exists name_escaped then
 			begin
-				let dest_dir = (Filename.dirname Sys.argv.(par_len - 1) ^ 
+				let dest_dir = (Filename.dirname name_escaped ^ 
 					"/compiled/") in
 				if Sys.file_exists dest_dir then
 					begin
@@ -52,10 +54,10 @@ else
 								
 				let _ = Sys.command ("mkdir " ^ dest_dir) in
 				printf "Directory %s created\n" dest_dir;
-				Compiler.compile Sys.argv.(par_len - 1);
+				Compiler.compile name_escaped;
 				write_to_file !Compiler.compiled 0 dest_dir
 			end
 		else
-			printf "File %s does not exist\n" Sys.argv.(par_len - 1)
+			printf "File %s does not exist\n" name_escaped
 	end
 ;;
