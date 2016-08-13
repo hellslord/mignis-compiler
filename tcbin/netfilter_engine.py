@@ -315,7 +315,7 @@ class NetfilterEngine(GenericEngine):
                     (self.LOGGING_FILTER if logging else "")
 
         # Return!
-        return filters + "COMMIT\n" + bindings + "COMMIT\n" + nat + "COMMIT"
+        return filters + "COMMIT\n" + bindings + "COMMIT\n" + nat + "COMMIT" + "\n"
 
     ''' This method is used to extract the couple (in a dictionary) {int_name, net_ip} '''
     def get_ip_by_name(self, name):
