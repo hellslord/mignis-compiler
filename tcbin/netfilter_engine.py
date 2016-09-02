@@ -14,17 +14,17 @@ class NetfilterEngine(GenericEngine):
     BASIC_FILTER = "*filter\n" + \
                    "-P INPUT DROP\n" + \
                    "-P FORWARD DROP\n" + \
-                   "-P OUTPUT DROP\n" + \
-                   "-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n" + \
-                   "-A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n" + \
-                   "-A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT\n{0}"
+                   "-P OUTPUT DROP\n{0}"
     BASIC_MANGLE = "*mangle\n" + \
                    "-P PREROUTING DROP\n"
     MANGLE_LO = "-A PREROUTING -i lo -j ACCEPT\n"
     BASIC_NAT = "*nat\n"
+    DEFAULT_ESTABLISHED = "-A INPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n" + \
+                          "-A OUTPUT -m state --state ESTABLISHED,RELATED -j ACCEPT\n" + \
+                          "-A FORWARD -m state --state ESTABLISHED,RELATED -j ACCEPT\n{0}"
     DEFAULT_FILTER = "-A INPUT -i lo -j ACCEPT -m comment --comment \"loopback (default rules)\"\n" + \
                      "-A INPUT -d 255.255.255.255 -j ACCEPT -m comment --comment \"broadcast (default r.)\"\n" + \
-                     "-A INPUT -d 224.0.0.0/4 -j ACCEPT -m comment --comment \"multicast (default r.)\""
+                     "-A INPUT -d 224.0.0.0/4 -j ACCEPT -m comment --comment \"multicast (default r.)\"\n"
     DEFAULT_MANGLE = "-A PREROUTING -m state --state INVALID,UNTRACKED -j DROP -m comment --comment \"inv. def.\"\n" + \
                      "-A PREROUTING -d 255.255.255.255 -j ACCEPT -m comment --comment \"default r.\"\n" + \
                      "-A PREROUTING -d 224.0.0.0/4 -j ACCEPT -m comment --comment \"default r.\"\n"
@@ -104,6 +104,8 @@ class NetfilterEngine(GenericEngine):
         def_rul = True
         # Logging
         logging = True
+        # Established
+        estb = False
         # This string is used to implement all the bindings between interfaces and ips
         bindings = ""
         # This string is used to implement the filters (with basic rules)
@@ -128,18 +130,25 @@ class NetfilterEngine(GenericEngine):
 
             if parsed[0] == self.OPTN:  # If the line is an OPTN
                 # We manage the options by setting flags
-                if parsed[1][0] == "default_rules":
+                if parsed[1][0] == "default_rules":  # Default rules
                     if parsed[1][1] == "yes":
                         def_rul = True
                     elif parsed[1][1] == "no":
                         def_rul = False
                     else:
                         print("WARNING: Value for option '%s' not valid: %s" % (parsed[1][0], parsed[1][1]))
-                elif parsed[1][0] == "logging":
+                elif parsed[1][0] == "logging":  # Logging
                     if parsed[1][1] == "yes":
                         logging = True
                     elif parsed[1][1] == "no":
                         logging = False
+                    else:
+                        print("WARNING: Value for option '%s' not valid: %s" % (parsed[1][0], parsed[1][1]))
+                elif parsed[1][0] == "established":  # Established management
+                    if parsed[1][1] == "yes":
+                        estb = True
+                    elif parsed[1][1] == "no":
+                        estb = False
                     else:
                         print("WARNING: Value for option '%s' not valid: %s" % (parsed[1][0], parsed[1][1]))
                 else:
@@ -310,8 +319,9 @@ class NetfilterEngine(GenericEngine):
                     bindings + \
                     self.MANGLE_LO + \
                     (self.LOGGING_MANGLE if logging else "")
-        # Final filter rules list
-        filters = (filters.format(self.DEFAULT_FILTER + "\n") if def_rul else filters.format("")) + \
+        # Final filter rules list - First add established, then all the rest!
+        filters = (filters.format(self.DEFAULT_ESTABLISHED) if estb else filters.format("{0}"))
+        filters = (filters.format(self.DEFAULT_FILTER) if def_rul else filters.format("")) + \
                     (self.LOGGING_FILTER if logging else "")
 
         # Return!

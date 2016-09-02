@@ -1,6 +1,7 @@
 OPTIONS
 default_rules   no
 logging         no
+established     yes
 
 INTERFACES
 wan     eth2 0.0.0.0/0			# Internet

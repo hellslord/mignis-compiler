@@ -5,6 +5,10 @@ let compiled:(string list) ref = ref [];;
 (* List of operands to keep track of overlappings *)
 let overlaps:(string list) ref = ref [];;
 
+(* Are we on a Mignis or Mignis+ configuration file? *)
+type conf_t = Mignis | MignisPlus | NotSet;;
+let conf:(conf_t) ref = ref NotSet;;
+
 (* This global expression is used to tokenize the operands. It's global *)
 (* because we need it in more than one function and for since the overlaps *)
 (* detection is not efficient, we don't want to call the Str.regexp more *)
@@ -67,15 +71,34 @@ let rec find needle ambient =
     result_alias
 ;;
 
+(* This function is the one that is allowed to track if we are on a Mignis *)
+(* or Mignis+ configuration file and it keeps things coherent *)
 let set_interface inf amb =
   match inf with
-  | Mast.Noif                    -> ""
+  | Mast.Noif                    -> 
+		if !conf = MignisPlus then
+			failwith("Mignis and Mignis+ rules cannot be used together")
+		else if !conf = NotSet then
+			begin
+			  conf := Mignis;
+		    ""
+			end
+		else
+			""
   | Mast.If(id)                  ->
-    let resolved = find id amb in
-    if resolved = "" then
-      failwith("Interface not declared")
-    else
-      resolved
+		let resolved = find id amb in
+		if resolved = "" then
+			failwith("Interface not declared")
+		else
+			if !conf = Mignis then
+				failwith("Mignis and Mignis+ rules cannot be used together")
+			else if !conf = NotSet then
+				begin
+					conf := MignisPlus;
+          resolved
+				end
+			else
+				resolved
 ;;
 
 (* Aux functions to correctly compile all the components of a rule *)
@@ -231,7 +254,10 @@ let rec create_rules rls ambient =
                                     else
                                       failwith(!warning)
   | Mast.Drop(from,snat,dnat,dest,prt,frm)::rest 
-                                 -> let operands =
+                                 -> if !conf = MignisPlus then
+																	    failwith("Mignis+ does not allow " ^ 
+																			         "for negative rules");
+																	  let operands =
                                       set_op from snat dnat dest prt frm ambient
                                                                               in
                                     if check_overlaps (Str.split comma operands)
@@ -247,7 +273,10 @@ let rec create_rules rls ambient =
                                    else
                                      failwith(!warning);
   | Mast.Reject(from,snat,dnat,dest,prt,frm)::rest 
-                                 -> let operands =
+                                 -> if !conf = MignisPlus then
+																	    failwith("Mignis+ does not allow " ^ 
+																			         "for negative rules");
+																	  let operands =
                                       set_op from snat dnat dest prt frm ambient
                                                                               in
                                     if check_overlaps (Str.split comma operands)
