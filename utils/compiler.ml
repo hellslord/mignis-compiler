@@ -150,8 +150,18 @@ let set_op se sn dn de pr fr amb =
   (set_formula fr)
 ;;
 
+(* Aux function to check if a string is a substring of another *)
+(* Source code found at *)
+(* http://stackoverflow.com/questions/11193783/ocaml-strings-and-substrings *)
+let contains s1 s2 =
+  let re = Str.regexp_string s2 in
+  try 
+    ignore (Str.search_forward re s1 0); 
+    true
+  with Not_found -> false
+
 (* Aux function to find overlaps in two rules *)
-let ovlp_rule r1 r2 = 
+let chk_rule r1 r2 = 
   let s1 = List.nth r1 0 ^ "," ^ List.nth r1 1 ^ "," ^ List.nth r1 2 in
   let s2 = List.nth r2 0 ^ "," ^ List.nth r2 1 ^ "," ^ List.nth r2 2 in
   let sn1 = List.nth r1 3 ^ "," ^ List.nth r1 4 ^ "," ^ List.nth r1 5 in
@@ -199,6 +209,16 @@ let ovlp_rule r1 r2 =
       warning := "Destination masquarade is not allowed";
       false
     end
+  else if sn1 = "ANY,,0" || dn1 = "ANY,,0" then
+    begin
+      warning := "Wildcard * cannot be used in NAT declarations";
+      false
+    end
+  else if (contains sn1 "LOCAL") || (contains dn1 "LOCAL") then
+    begin
+      warning := "Keyword local cannot be used in NAT declarations";
+      false
+    end
   else
     true
 ;;
@@ -208,7 +228,7 @@ let ovlp_rule r1 r2 =
 let rec check_overlaps opns current = 
   match current with
   | rule::rest                   -> let rule_token = Str.split comma rule in
-                                    if ovlp_rule opns rule_token = false then
+                                    if chk_rule opns rule_token = false then
                                       false
                                     else
                                       check_overlaps opns rest

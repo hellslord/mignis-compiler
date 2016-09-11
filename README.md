@@ -5,7 +5,7 @@
 Author: Alessio Zennaro
 Supervisor: Prof. Riccardo Focardi
 A.Y.: 2015/16
-Version: 2.3
+Version: 2.3.1
 
 This is the new Mignis(+) compiler.
 It has been created to perform a translation of a Mignis(+) configuration file
@@ -33,14 +33,10 @@ At the moment the syntax of Mignis+ is recognized by the parser but the
 final translator does not implement its features.
 
 
-Version 2.3 new features:
-* Mignis and Mignis+ rulex cannot be used together
-* Mignis+ configuration files must use only positive rules
-* Established connection are not accepted by default:
-  there is a new option 'established' that can be set to:
-   1- off (default): if established connection are not to be accepted by default
-   2- on: if established connection are to be accepted by default
+Version 2.3.1 new features:
+* NAT declaration now forbids the use of the wildcard * and the keyword
+  local
 
-2016-09-02
+2016-09-11
 
 </pre>
