@@ -73,10 +73,10 @@ let rec find needle ambient =
 
 (* This function is the one that is allowed to track if we are on a Mignis *)
 (* or Mignis+ configuration file and it keeps things coherent *)
-let set_interface inf amb =
+let set_interface inf amb nat =
   match inf with
   | Mast.Noif                    -> 
-		if !conf = MignisPlus then
+		if !conf = MignisPlus && nat = false then
 			failwith("Mignis and Mignis+ rules cannot be used together")
 		else if !conf = NotSet then
 			begin
@@ -90,7 +90,7 @@ let set_interface inf amb =
 		if resolved = "" then
 			failwith("Interface not declared")
 		else
-			if !conf = Mignis then
+			if !conf = Mignis && nat = false then
 				failwith("Mignis and Mignis+ rules cannot be used together")
 			else if !conf = NotSet then
 				begin
@@ -102,7 +102,7 @@ let set_interface inf amb =
 ;;
 
 (* Aux functions to correctly compile all the components of a rule *)
-let set_endpoint e amb = 
+let set_endpoint e amb nat= 
   match e with
   | Mast.Name(host,interface,port)
                                  ->
@@ -110,10 +110,11 @@ let set_endpoint e amb =
     if resolved = "" then
       failwith("Alias or interface not declared")
     else
-      resolved ^ ";" ^ (set_interface interface amb) ^ ";" ^ string_of_int(port)
+      resolved ^ ";" ^ (set_interface interface amb nat) ^ ";" ^ 
+        string_of_int(port)
   | Mast.Ip(host,interface,port)
                                  ->
-    host ^ ";" ^ (set_interface interface amb) ^ ";" ^ string_of_int(port)
+    host ^ ";" ^ (set_interface interface amb nat) ^ ";" ^ string_of_int(port)
   | Mast.Local(port)             ->
     "LOCAL" ^ ";;" ^ string_of_int(port)
   | Mast.Star                    -> "ANY;;0"
@@ -121,7 +122,7 @@ let set_endpoint e amb =
 
 let set_nat n amb = 
   match n with
-  | Mast.Nat(ep)                 -> set_endpoint ep amb
+  | Mast.Nat(ep)                 -> set_endpoint ep amb true
   | Mast.Masquerade              -> "MASQUERADE;;0"
   | Mast.Nonat                   -> ";;0"
 ;;
@@ -142,9 +143,9 @@ let set_formula f =
 
 (* Aux function used to create the operands of a rule *)
 let set_op se sn dn de pr fr amb = 
-  (set_endpoint se amb) ^ ";" ^
+  (set_endpoint se amb false) ^ ";" ^
   (set_nat sn amb) ^ ";" ^
-  (set_endpoint de amb) ^ ";" ^
+  (set_endpoint de amb false) ^ ";" ^
   (set_nat dn amb) ^ ";" ^
   (set_protocol pr) ^ ";" ^
   (set_formula fr)
@@ -325,8 +326,8 @@ let rec create_policies pol amb =
   match pol with
   | Mast.Default(op,end1,end2,pr)::rest
                                  -> (set_policy_rule op) ^
-                                    (set_endpoint end1 amb) ^ ";" ^
-                                    (set_endpoint end2 amb) ^ ";" ^
+                                    (set_endpoint end1 amb false) ^ ";" ^
+                                    (set_endpoint end2 amb false) ^ ";" ^
                                     (set_protocol pr) ^ "\n" ^
                                     create_policies rest amb
   | []                           -> ""

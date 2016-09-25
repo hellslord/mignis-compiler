@@ -109,16 +109,16 @@ class GenericEngine:
         print("\nINF: Successfully read %d files\n" % total)
         return conf_list
 
-    ''' This method is used to parse a line. A line is made of a string, a colon and then another string
+    ''' This method is used to parse a line. A line is made of a string (of 4 chars), a colon and then another string
         made of a sequence of string separated by a semicolon.
         It returns a tuple of two elements: the first one is the first string, the second one is a list of all
         the parameters found in the second string
     '''
     def parse_line(self, line):
-        cmd_par = line.split(':')
-        par_list = cmd_par[1].split(';')
+        cmd_par = line[0:4]
+        par_list = line[5:].split(';')
 
-        return (cmd_par[0], par_list)
+        return (cmd_par, par_list)
 
     ''' This method is used to get all the details of a rule, grouped by their meaning. For instance the first
         three elements are to identify the source endpoint, so they are grouped together (host, int, port).

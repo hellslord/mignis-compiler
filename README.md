@@ -5,7 +5,7 @@
 Author: Alessio Zennaro
 Supervisor: Prof. Riccardo Focardi
 A.Y.: 2015/16
-Version: 2.3.1
+Version: 2.4
 
 This is the new Mignis(+) compiler.
 It has been created to perform a translation of a Mignis(+) configuration file
@@ -21,6 +21,11 @@ In order to make this work:
 3- Check if mignis.py and tcbin/target_compiler.py have both +x permissions
 3- From the directory where mignis.py is located issue the command:
      ./mignis.py IPTABLES path/to/mignis_configuration_file
+   Please notice that this produces Netfilter rules.
+
+Issue the command:
+     ./mignis.py list
+for the complete list of supported target language
 
 In /path/to/mignis_configuration_file will be created two folders:
 1- compiled: inside this folder you can find all the files .config written in
@@ -33,10 +38,10 @@ At the moment the syntax of Mignis+ is recognized by the parser but the
 final translator does not implement its features.
 
 
-Version 2.3.1 new features:
-* NAT declaration now forbids the use of the wildcard * and the keyword
-  local
+Version 2.4 new features:
+* Beta support for Mignis+ rule
+* Bug correction: NAT syntax in Mignis+ does not require interface anymore
 
-2016-09-11
+2016-09-25
 
 </pre>

@@ -10,6 +10,9 @@ from generic_engine import GenericEngine
 
 class NetfilterEngine(GenericEngine):
 
+    # Flag for the Mignis+ warning
+    migplus = False
+
     # Here all the iptables rule templates are defined in variables, to avoid the use of strings in the code.
     BASIC_FILTER = "*filter\n" + \
                    "-P INPUT DROP\n" + \
@@ -87,10 +90,10 @@ class NetfilterEngine(GenericEngine):
 
     # Variables (list of tuples) used in the switch_elements method. For each tuple the first element is substituted
     # with the second element
-    SW_SOURCE = [("-i", "-o"), ("-s", "-d")]
-    SW_DESTINATION = [("-o", "-i"), ("-d", "-s")]
-    SW_SPORT = [("sport", "dport")]
-    SW_DPORT = [("dport", "sport")]
+    SW_SOURCE = [(SOURCE_INTF, DESTINATION_INTF), (SOURCE_HOST, DESTINATION_HOST)]
+    SW_DESTINATION = [(DESTINATION_INTF, SOURCE_INTF), (DESTINATION_HOST, SOURCE_HOST)]
+    SW_SPORT = [(SPORT, DPORT)]
+    SW_DPORT = [(DPORT, SPORT)]
 
     ''' Constructor '''
     def __init__(self, directory):
@@ -181,8 +184,10 @@ class NetfilterEngine(GenericEngine):
                 # Let's begin: we get all the details from the rule
                 rule_detail = self.get_rule_details(parsed[1])
 
-                if rule_detail[0][1] != "" or rule_detail[2][1] != "":
-                    print("Warning: Mignis+ interface specification not yet supported")
+                if (rule_detail[0][1] != "" or rule_detail[2][1] != "") and not self.migplus:
+                    print("WARNING: MIGNIS+ RULE SPECIFICATION IS A FEATURE STILL IN BETA!!")
+                    print("Check the rules before setting up the firewall.")
+                    self.migplus = True
 
                 if rule_detail[0][0][1] == '-':  # If there's an ip in the source, we set "-s <ip>"
                     source = self.SOURCE_HOST + rule_detail[0][0][2:]
@@ -190,6 +195,10 @@ class NetfilterEngine(GenericEngine):
                     s_local = True
                 elif rule_detail[0][0] != self.ANY:  # If there isn't a star in the source field we set "-i <intf>"
                     source = self.SOURCE_INTF + rule_detail[0][0]
+
+                # If there's an interface (Mignis+) we set also the -i option
+                if rule_detail[0][1] != "":
+                    source += " " + self.SOURCE_INTF + rule_detail[0][1]
 
                 # Same for destination but with "-d" and "-o" instead of "-s" and "-i" respectively
                 if rule_detail[2][0][1] == '-':
@@ -199,12 +208,16 @@ class NetfilterEngine(GenericEngine):
                 elif rule_detail[2][0] != self.ANY:
                     destination = self.DESTINATION_INTF + rule_detail[2][0]
 
+                # If there's an interface (Mignis+) we set also the -0 option
+                if rule_detail[2][1] != "":
+                    destination += " " + self.DESTINATION_INTF + rule_detail[2][1]
+
                 if rule_detail[0][2] != "0":  # Source port
                     sport = self.SPORT + rule_detail[0][2]
                 if rule_detail[2][2] != "0":  # Destination port
                     dport = self.DPORT + rule_detail[2][2]
 
-                if rule_detail[4] != self.ANY:  # If a protocol is specified, we set it with "-p <protocol"
+                if rule_detail[4] != self.ANY:  # If a protocol is specified, we set it with "-p <protocol>"
                     protocol = self.PROTOCOL + rule_detail[4].lower()
 
                 if parsed[0] == self.ALLW or parsed[0] == self.TALW:  # If the operator is > or <>
@@ -276,16 +289,24 @@ class NetfilterEngine(GenericEngine):
                             dest_mangle = destination
                         binding_nat += self.MANGLE_NAT.format(protocol, source, sport, dest_mangle, dport, l)
                         # Here all the parameters for the NAT rule are set
+                        int_index = destination.find(self.DESTINATION_INTF)
                         if destination == "" or destination[1] != "d":
                             to_destination = "None"
                         else:
-                            to_destination = destination[3:]
+                            if int_index == -1:
+                                to_destination = destination[3:]
+                            else:
+                                to_destination = destination[3:int_index - 1]
                         if dport != "":
                             to_destination += ":" + dport[8:]
                         if rule_detail[3][0][1] != '-':
                             destination = self.DESTINATION_HOST + self.get_ip_by_name(rule_detail[3][0])[0]["net_ip"]
                         else:
-                            destination = self.DESTINATION_HOST + rule_detail[3][0][2:]
+                            if int_index != -1:
+                                save = " " + self.DESTINATION_INTF + destination[int_index:]
+                            else:
+                                save = ""
+                            destination = self.DESTINATION_HOST + rule_detail[3][0][2:] + save
                         if rule_detail[3][2] != 0:
                             dport = self.DPORT + rule_detail[3][2]
                         else:

@@ -10,19 +10,18 @@ wlan    eth1 172.22.0.0/16		# Wireless
 
 ALIASES
 mypc    10.0.0.2			# My PC
-router  82.120.12.3			# External router address
+router  1.2.3.4				# External router address
 server  10.0.0.3			# An internal Server
 mal     192.168.1.0/24			# A malicious network
 
 FIREWALL
 lan [.] > wan 				# lan can go outside with masquerade
 wlan / wan				# wlan cannot go outside
-wlan > mypc:8080			# wlan can connect to mypc at port 8080
+wlan > mypc:8080 tcp			# wlan can connect to mypc at port 8080
 * > [router:80] server:80		# Anything can connect to server:80 with dNAT
-* / mal 				# Nothib can connect to mal
+* / mal 				# Nothing can connect to mal
 
 POLICIES
-wan / lan
 * // lan 
 
 CUSTOM
