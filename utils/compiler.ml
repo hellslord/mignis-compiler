@@ -2,7 +2,7 @@
 (* firewall *)
 let compiled:(string list) ref = ref [];;
 
-(* List of operands to keep track of overlappings *)
+(* List of operands to keep track of overlapping rules *)
 let overlaps:(string list) ref = ref [];;
 
 (* Are we on a Mignis or Mignis+ configuration file? *)
@@ -26,7 +26,7 @@ let rec create_options opt =
   | []                           -> ""
 ;;
 
-(* Aux function that is used to create the bindings between interfaces and *)
+(* Aux function that is used to create the bounds between interfaces and *)
 (* network ip addresses *)
 let rec create_interfaces ifs =
   match ifs with
@@ -37,7 +37,7 @@ let rec create_interfaces ifs =
 
 (* The following two aux functions are used to find an alias or an interface *)
 (* Note that interfaces are bound to a net ip address, so here the nic name *)
-(* is returned, while aliases are never actually saved: the corresponding ip*)
+(* is returned, while aliases are never actually saved: the corresponding ip *)
 (* is returned *)
 let rec find_alias lst needle =
   match lst with
@@ -76,29 +76,29 @@ let rec find needle ambient =
 let set_interface inf amb nat =
   match inf with
   | Mast.Noif                    -> 
-		if !conf = MignisPlus && nat = false then
-			failwith("Mignis and Mignis+ rules cannot be used together")
-		else if !conf = NotSet then
-			begin
-			  conf := Mignis;
-		    ""
-			end
-		else
-			""
+    if !conf = MignisPlus && nat = false then
+      failwith("Mignis and Mignis+ rules cannot be used together")
+    else if !conf = NotSet then
+      begin
+        conf := Mignis;
+        ""
+      end
+    else
+      ""
   | Mast.If(id)                  ->
-		let resolved = find id amb in
-		if resolved = "" then
-			failwith("Interface not declared")
-		else
-			if !conf = Mignis && nat = false then
-				failwith("Mignis and Mignis+ rules cannot be used together")
-			else if !conf = NotSet then
-				begin
-					conf := MignisPlus;
+    let resolved = find id amb in
+    if resolved = "" then
+      failwith("Interface not declared")
+    else
+      if !conf = Mignis && nat = false then
+        failwith("Mignis and Mignis+ rules cannot be used together")
+      else if !conf = NotSet then
+        begin
+          conf := MignisPlus;
           resolved
-				end
-			else
-				resolved
+        end
+      else
+        resolved
 ;;
 
 (* Aux functions to correctly compile all the components of a rule *)
@@ -154,6 +154,7 @@ let set_op se sn dn de pr fr amb =
 (* Aux function to check if a string is a substring of another *)
 (* Source code found at *)
 (* http://stackoverflow.com/questions/11193783/ocaml-strings-and-substrings *)
+(* Last checked october 4th 2016 *)
 let contains s1 s2 =
   let re = Str.regexp_string s2 in
   try 
@@ -276,9 +277,9 @@ let rec create_rules rls ambient =
                                       failwith(!warning)
   | Mast.Drop(from,snat,dnat,dest,prt,frm)::rest 
                                  -> if !conf = MignisPlus then
-																	    failwith("Mignis+ does not allow " ^ 
-																			         "for negative rules");
-																	  let operands =
+                                      failwith("Mignis+ does not allow " ^ 
+                                               "for negative rules");
+                                    let operands =
                                       set_op from snat dnat dest prt frm ambient
                                                                               in
                                     if check_overlaps (Str.split comma operands)
@@ -295,9 +296,9 @@ let rec create_rules rls ambient =
                                      failwith(!warning);
   | Mast.Reject(from,snat,dnat,dest,prt,frm)::rest 
                                  -> if !conf = MignisPlus then
-																	    failwith("Mignis+ does not allow " ^ 
-																			         "for negative rules");
-																	  let operands =
+                                      failwith("Mignis+ does not allow " ^ 
+                                               "for negative rules");
+                                    let operands =
                                       set_op from snat dnat dest prt frm ambient
                                                                               in
                                     if check_overlaps (Str.split comma operands)
@@ -370,7 +371,7 @@ let rec build_conf len =
       ()
 ;;
 
-(* Main function of the compiler component. It just call the build_conf *)
+(* Main function of the backend component. It just call the build_conf *)
 (* with the correct length. Please note that all the lists in the Scope *)
 (* module have the same length *)
 let compile file = 

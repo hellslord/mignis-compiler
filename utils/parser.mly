@@ -26,112 +26,112 @@
 %%
 /* The options part always begins with the keyword OPTION */
 Options:
-	OPTION OptionList										{ $2 }
+  OPTION OptionList                    { $2 }
 ;
 /* The list of options is made of two IDs, one for the keyword, one for the */
 /* value */
 OptionList:
-	IDENTIFIER IDENTIFIER OptionList		{ Option($1, $2)::$3 }
- |																		{ [] }
+  IDENTIFIER IDENTIFIER OptionList     { Option($1, $2)::$3 }
+ |                                     { [] }
 ;
 /* The interface part begins with the keyword INTERFACE */
 InterfaceDecl:
-	INTERFACE InterfList								{ $2 }
+  INTERFACE InterfList                 { $2 }
 ;
 /* This is the structure of an interface declaration */
 InterfList:
-	IDENTIFIER IDENTIFIER NET_IP	InterfList
-																			{ Interface($1, $2, $3)::$4 }
- |																		{ [] } /* Empty list */
+  IDENTIFIER IDENTIFIER NET_IP  InterfList
+                                       { Interface($1, $2, $3)::$4 }
+ |                                     { [] } /* Empty list */
 ;
 /* The alias part begins with the keyword ALIAS */
 AliasDecl:
-	ALIAS AliasList											{ $2 }
+  ALIAS AliasList                      { $2 }
 ;
 /* This is how a new alias is declared */
 AliasList:
-	IDENTIFIER HOST_IP AliasList				{ Hostalias($1, $2)::$3 }
- |IDENTIFIER NET_IP AliasList					{ Netalias($1, $2)::$3 }
- |																		{ [] }
+  IDENTIFIER HOST_IP AliasList         { Hostalias($1, $2)::$3 }
+ |IDENTIFIER NET_IP AliasList          { Netalias($1, $2)::$3 }
+ |                                     { [] }
 ;
-/* The firewall rules are specified after the keyword FIREWALL is found */
+/* Firewall rules are specified after the keyword FIREWALL */
 FirewallConf:
-	FIREWALL FirewList									{ $2 }
+  FIREWALL FirewList                   { $2 }
 ;
 /* Firewall rules have a rather complex structure: */
 /* Each of them has two endpoints, possibly two nats (snat and dnat) */
 /* an operator and a protocol. Some of them could not be specified but in the */
 /* AST they are all explicit */
 FirewList:
-	Endp Nt ALLOW Nt Endp Prtc Formula FirewList
-																			{ Allow($1, $2, $4, $5, $6, $7)::$8 }
+  Endp Nt ALLOW Nt Endp Prtc Formula FirewList
+                                       { Allow($1, $2, $4, $5, $6, $7)::$8 }
  |Endp Nt TWALLOW Nt Endp Prtc Formula FirewList
-																			{ Twallow($1, $2, $4, $5, $6, $7)::$8 }
+                                       { Twallow($1, $2, $4, $5, $6, $7)::$8 }
  |Endp Nt DROP Nt Endp Prtc Formula FirewList
-																			{ Drop($1, $2, $4, $5, $6, $7)::$8 }
+                                       { Drop($1, $2, $4, $5, $6, $7)::$8 }
  |Endp Nt REJECT Nt Endp Prtc Formula FirewList
-																			{ Reject($1, $2, $4, $5, $6, $7)::$8 }
- |																		{ [] }
+                                       { Reject($1, $2, $4, $5, $6, $7)::$8 }
+ |                                     { [] }
 ;
 /* This is how an endpoint looks like */
 Endp:
-  IDENTIFIER If Prt										{ Name($1, $2, $3) }
- |HOST_IP If Prt											{ Ip("h-" ^ $1, $2, $3) }
- |NET_IP If Prt                       { Ip("n-" ^ $1, $2, $3) } 
- |LOCAL Prt														{ Local($2) }
- |STAR																{ Star }
+  IDENTIFIER If Prt                    { Name($1, $2, $3) }
+ |HOST_IP If Prt                       { Ip("h-" ^ $1, $2, $3) }
+ |NET_IP If Prt                        { Ip("n-" ^ $1, $2, $3) } 
+ |LOCAL Prt                            { Local($2) }
+ |STAR                                 { Star }
 ;
 /* Basically if no port is explicitly specified, we use the dummy 0 value */
 Prt:
-  PORT																{ $1 }
- |																		{ 0 }
+  PORT                                 { $1 }
+ |                                     { 0 }
 ;
 /* Interface management for Mignis+ */
 If:
-	AT IDENTIFIER												{ If($2) }
- |																		{ Noif }
+  AT IDENTIFIER                        { If($2) }
+ |                                     { Noif }
 ;
 /* Nat, managing the masquerade case */
 Nt:
-	LBRACK DOT RBRACK										{ Masquerade }
- |LBRACK Endp RBRACK									{ Nat($2) }
- |																		{ Nonat } /* No nat is specified */
+  LBRACK DOT RBRACK                    { Masquerade }
+ |LBRACK Endp RBRACK                   { Nat($2) }
+ |                                     { Nonat } /* No nat is specified */
 ;
 /* The protocol */
 Prtc:
-	TCP																	{ Tcp }
- |UDP																	{ Udp }
- |ICMP																{ Icmp }
- |																		{ Noprotocol } /* no explicit protocol */
+  TCP                                  { Tcp }
+ |UDP                                  { Udp }
+ |ICMP                                 { Icmp }
+ |                                     { Noprotocol } /* no explicit protocol */
 ; 
 /* Formulas in mignis+ */
 Formula:
-	FORMULA															{ Formula($1) }
- |																		{ Noformula }
+  FORMULA                              { Formula($1) }
+ |                                     { Noformula }
 /* The policy section begins with the keyword POLICY */
 PolicyConf:
-	POLICY PolicyList										{ $2 }
+  POLICY PolicyList                    { $2 }
 ;
 /* This is the structure of a default policy rule */
 PolicyList:
-  Endp DROP Endp Prtc PolicyList			{ Default(Pdrop, $1, $3, $4)::$5 }
- |Endp REJECT Endp Prtc PolicyList		{ Default(Preject, $1, $3, $4)::$5 }
- |																		{ [] }
+  Endp DROP Endp Prtc PolicyList       { Default(Pdrop, $1, $3, $4)::$5 }
+ |Endp REJECT Endp Prtc PolicyList     { Default(Preject, $1, $3, $4)::$5 }
+ |                                     { [] }
 ;
-/* The custom rules begins with the keyword CUSTOM */
+/* The custom rules section begins with the keyword CUSTOM */
 CustomRules:
-	CUSTOM CustomList										{ $2 }
+  CUSTOM CustomList                    { $2 }
 ;
 /* All the custom rules are added to a specific list */
 CustomList:
-	CUSTOMRULE CustomList								{ $1::$2 }
- |																		{ [] }
+  CUSTOMRULE CustomList                { $1::$2 }
+ |                                     { [] }
 ;
-/* A valid configuration is made of four elements */
+/* Main configuration */
 config:
   Options InterfaceDecl AliasDecl FirewallConf PolicyConf CustomRules config
-																			{ Firewall($1, $2, $3, $4, $5, $6)::$7 }
- |EOF																	{ [] }
+                                       { Firewall($1, $2, $3, $4, $5, $6)::$7 }
+ |EOF                                  { [] }
 ;
 
 %%

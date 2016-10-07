@@ -2,7 +2,7 @@ open Lexer;;
 open Parser;;
 open List;;
 
-(* Definition of several list: each of them keep track of a certain part of *)
+(* Definition of several list: each of them keeps track of a certain part of *)
 (* the Mignis Abstract Syntax Tree. For all list, the n-th position describes *)
 (* the configuration of the n-th firewall *)
 
@@ -66,7 +66,7 @@ let conf_firewall (fw:Mast.firewall) =
 let rec create_conf_table (ast:Mast.config) =
   match ast with
   | fw::rest                            -> conf_firewall fw; 
-	                                         create_conf_table rest
+                                           create_conf_table rest
   | []                                  -> ()
 ;;
 

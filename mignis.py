@@ -13,8 +13,12 @@ def main():
         print("Usage: ./mignis.py [list | <language>] <file>")
         exit(0)
 
-    if len(sys.argv) == 2 and sys.argv[1] == "list":  # Show a list of supported language
-        print(subprocess.check_output("./tcbin/target_compiler.py list", shell=True).decode())
+    # Show a list of supported language
+    if len(sys.argv) == 2 and sys.argv[1] == "list":
+        print(
+            subprocess.check_output("./tcbin/target_compiler.py list",
+                                    shell=True)
+            .decode())
         exit(0)
     elif len(sys.argv) == 2 and sys.argv[1] != "list":  # This is a wrong usage
         print("Usage: ./mignis.py [list | <language>] <file>")
@@ -22,14 +26,21 @@ def main():
 
     language = sys.argv[1]  # The language to be used
     file_name = sys.argv[2]  # The complete file name
-    directory = os.path.dirname(file_name) + "/"  # The directory the file is located in
+    # The directory the file is located in
+    directory = os.path.dirname(file_name) + "/"
     if directory == "/":  # If there's no directory
         directory = '.' + directory  # Add it as the local one
 
     # Try to execute the compiler and the translator
     try:
-        print(subprocess.check_output("./utils/mignis_ic -f " + file_name, shell=True).decode())
-        print(subprocess.check_output("./tcbin/target_compiler.py " + language + " " + directory, shell=True).decode())
+        print(
+            subprocess.check_output("./utils/mignis_ic -f " + file_name,
+                                    shell=True)
+            .decode())
+        print(
+            subprocess.check_output("./tcbin/target_compiler.py " +
+                                    language + " " + directory, shell=True)
+            .decode())
     except subprocess.CalledProcessError, e:
         print(e.output)
 

@@ -5,7 +5,7 @@
 Author: Alessio Zennaro
 Supervisor: Prof. Riccardo Focardi
 A.Y.: 2015/16
-Version: 2.4
+Version: 2.4.1
 
 This is the new Mignis(+) compiler.
 It has been created to perform a translation of a Mignis(+) configuration file
@@ -34,14 +34,10 @@ In /path/to/mignis_configuration_file will be created two folders:
    iptables language.
 
 
-At the moment the syntax of Mignis+ is recognized by the parser but the
-final translator does not implement its features.
+Version 2.4.1 new features:
+* Comment and alignment in the code fixed
+* Python scripts source code  arranged in 80 columns
 
-
-Version 2.4 new features:
-* Beta support for Mignis+ rule
-* Bug correction: NAT syntax in Mignis+ does not require interface anymore
-
-2016-09-25
+2016-10-07
 
 </pre>
