@@ -1,4 +1,4 @@
-(* List of string in which we save the compiled configuration for each *)
+(* List of strings in which we save the compiled configuration for each *)
 (* firewall *)
 let compiled:(string list) ref = ref [];;
 
@@ -14,6 +14,10 @@ let conf:(conf_t) ref = ref NotSet;;
 (* detection is not efficient, we don't want to call the Str.regexp more *)
 (* than once*)
 let comma = Str.regexp ";";;
+
+(* This global expression is used as a dummy rule useful to check some *)
+(* conditions on the first real rule *)
+let dummy = ";;;;;;;;;;;;;;";;
 
 (* This global expression is used only to pass a message in case of bad rules *)
 let warning:string ref = ref "";;
@@ -234,7 +238,8 @@ let rec check_overlaps opns current =
                                       false
                                     else
                                       check_overlaps opns rest
-  | []                           -> true
+  | []                           -> let dummy_token = Str.split comma dummy in
+                                    chk_rule opns dummy_token
 ;;
 
 (* Aux function used to create the list of rules *)
