@@ -6,6 +6,7 @@ __author__ = "Alessio Zennaro"
 ''' The list of supported target languages, imported as classes '''
 from netfilter_engine import NetfilterEngine        # Netfilter/Iptables
 from example_engine import ExampleEngine            # Example
+from junos_engine import JunosEngine                # Juniper
 
 import os
 import shutil
@@ -49,6 +50,8 @@ def main():
     engine = None
     if sys.argv[1] == "IPTABLES":
         engine = NetfilterEngine(main_dir)
+    elif sys.argv[1] == "JUNOS":
+        engine = JunosEngine(main_dir)
     elif sys.argv[1] == "EXAMPLE":
         engine = ExampleEngine(main_dir)
     # Special value: we obtain a list of supported target languages
@@ -57,6 +60,7 @@ def main():
         print("^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^")
         print("\n")
         print("IPTABLES:\tStandard Netfilter/iptables for Linux OS")
+        print("JUNOS:\tJuniper firewall appliance")
         print(
             "EXAMPLE:\tAn example used as test that produces a fake final " + \
             "configuration"
