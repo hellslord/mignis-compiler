@@ -401,15 +401,24 @@ class JunosEngine(GenericEngine):
     ''' Interfaces names in JunOS are called as xx-n/m/i (where xx are two
         letters, n m and i are numbers) but Mignis(+) syntax forbids the use
         of - and / in the identifiers. Interfaces' name must be written in the
-        form xx_n_m_i.
+        form xx_n_m_i
         This method transforms underscores in the correct character
+        If the interfaces' names are not written in the correct form, a warning
+        is printed and no changes are made
     '''
     def create_interface_name(self, interface):
-        return \
-            interface[0:2] + "-" + \
-            interface[3] + "/" + \
-            interface[5] + "/" + \
-            interface[7]
+        if len(interface) != 8 or interface[2] != '_' \
+           or interface[4] != '_' or interface[6] != '_':
+            print("WARNING: Interface's name not written correctly %s" % \
+                  interface)
+            int = interface
+        else:
+            int = interface[0:2] + "-" + \
+                  interface[3] + "/" + \
+                  interface[5] + "/" + \
+                  interface[7]
+
+        return int
 
     ''' Juniper could need to know where to route packets going to 0.0.0.0/0
         In order to allow this, an option with the static routing ip must be

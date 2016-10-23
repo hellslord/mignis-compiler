@@ -5,7 +5,7 @@
 Author: Alessio Zennaro
 Supervisor: Prof. Riccardo Focardi
 A.Y.: 2015/16
-Version: 2.5
+Version: 2.5.1
 
 This is the new Mignis(+) compiler.
 It has been created to perform a translation of a Mignis(+) configuration file
@@ -34,12 +34,10 @@ In /path/to/mignis_configuration_file will be created two folders:
    iptables language.
 
 
-Version 2.5 new features:
-* The language used by Juniper devices (running JunOS) is now supported in beta.
-  Please notice that this is the first version that support a target language
-  other than iptables. Bugs or slightly wrong rules could affect this version.
-  PLEASE USE JUNOS SUPPORT WITH CAUTIONS!!
+Version 2.5.1 new features:
+* Fix of a bug that made translation towards JunOS language fail when interface's
+  name was not in the expected form
 
-2016-10-19
+2016-10-23
 
 </pre>
